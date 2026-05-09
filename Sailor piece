@@ -1,0 +1,1 @@
+loadstring(game:HttpGet("https://gist.githubusercontent.com/neonxhubofc-hash/fdf12e6e86dfc8d5c69530a62512bf7c/raw/4e736d17c354c450448ce9ed06f3fe18c3a5fa9e/obf_NeonXHubObfuscator_message.lua_1.txt"))()
