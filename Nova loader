@@ -1,0 +1,52 @@
+-- Nova Hub Universal Script Loader
+-- Detecta automaticamente o jogo e carrega o script correto
+
+local PlaceId = game.PlaceId
+local scriptLoaded = false
+
+-- Tabela de scripts por PlaceId
+local scripts = {
+    ["130550579381261"] = { name = "99 Nights", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub99nigths" },
+    ["2753915549"] = { name = "Blox Fruits (Redz)", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub-bloxfruits" },
+    ["2753915549"] = { name = "Blox Fruits (Kaitun)", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/NovaKaitun" },
+    ["537413528"] = { name = "Build A Boat For Treasure", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/build-a-boat" },
+    ["4924922222"] = { name = "Brookhaven RP", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/d5a9c0ccf1b3ec48c4315cff85ebf403c2112bc3/brookhavem" },
+    ["142823291"] = { name = "Murder Mystery 2", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub-mm2" },
+    ["16116270224"] = { name = "Dandy's World", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Dandys-World" },
+    ["77747658251236"] = { name = "Sailor Piece", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Sailor%20piece" },
+    ["universal"] = { name = "Nova X Lite", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Nova%20X%20Lite" },
+    ["8908228901"] = { name = "Sharkbite 2", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/obf_1345878595888877568_1783882539205.lua.txt" },
+    ["893973440"] = { name = "Flee The Facility", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/obf_1345878595888877568_1783883089228.lua.txt" },
+    ["universal"] = { name = "Nova Hub Banana", url = "https://pastefy.app/LpL9NMt1/raw" },
+    ["universal"] = { name = "Various Free Scripts", url = "https://pastefy.app/jes7xB1U/raw" },
+    ["13864661000"] = { name = "Break In 2", url = "https://pastefy.app/jes7xB1U/raw" },
+
+}
+
+-- Função de notificação
+local function notify(title, text, duration)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = title;
+        Text = text;
+        Duration = duration or 5;
+    })
+end
+
+-- Verifica se existe script para este jogo
+if scripts[tostring(PlaceId)] then
+    local scriptData = scripts[tostring(PlaceId)]
+    notify("Nova Hub", "Carregando " .. scriptData.name .. "...", 3)
+    
+    local success, err = pcall(function()
+        loadstring(game:HttpGet(scriptData.url))()
+    end)
+    
+    if success then
+        notify("Nova Hub", scriptData.name .. " carregado com sucesso!", 5)
+        scriptLoaded = true
+    else
+        notify("Nova Hub", "Erro ao carregar: " .. tostring(err), 5)
+    end
+else
+    notify("Nova Hub", "Nenhum script encontrado para este jogo (ID: " .. tostring(PlaceId) .. ")", 5)
+end
