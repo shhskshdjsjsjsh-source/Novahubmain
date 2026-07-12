@@ -16,12 +16,16 @@ local breakIn2Ids = {
     [13864661000] = true
 }
 
+local dandysWorldIds = {
+    [16552821455] = true,
+    [16116270224] = true
+}
+
 local scripts = {
     ["130550579381261"] = { name = "99 Nights", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub99nigths" },
     ["537413528"] = { name = "Build A Boat For Treasure", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/build-a-boat" },
     ["4924922222"] = { name = "Brookhaven RP", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/d5a9c0ccf1b3ec48c4315cff85ebf403c2112bc3/brookhavem" },
     ["142823291"] = { name = "Murder Mystery 2", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub-mm2" },
-    ["16116270224"] = { name = "Dandy's World", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Dandys-World" },
     ["77747658251236"] = { name = "Sailor Piece", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Sailor%20piece" },
     ["8908228901"] = { name = "Sharkbite 2", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/obf_1345878595888877568_1783882539205.lua.txt" },
     ["893973440"] = { name = "Flee The Facility", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/obf_1345878595888877568_1783883089228.lua.txt" },
@@ -121,6 +125,17 @@ elseif breakIn2Ids[PlaceId] then
     end)
     if success then
         notify("Nova Hub", "Break In 2 carregado com sucesso!", 5)
+        scriptLoaded = true
+    else
+        notify("Nova Hub", "Erro ao carregar: " .. tostring(err), 5)
+    end
+elseif dandysWorldIds[PlaceId] then
+    notify("Nova Hub", "Carregando Dandy's World...", 3)
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Dandys-World"))()
+    end)
+    if success then
+        notify("Nova Hub", "Dandy's World carregado com sucesso!", 5)
         scriptLoaded = true
     else
         notify("Nova Hub", "Erro ao carregar: " .. tostring(err), 5)
