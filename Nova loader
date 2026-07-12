@@ -25,6 +25,7 @@ local scripts = {
     ["77747658251236"] = { name = "Sailor Piece", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Sailor%20piece" },
     ["8908228901"] = { name = "Sharkbite 2", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/obf_1345878595888877568_1783882539205.lua.txt" },
     ["893973440"] = { name = "Flee The Facility", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/obf_1345878595888877568_1783883089228.lua.txt" },
+    ["95082159892680"] = { name = "Novo Script", url = "https://pastefy.app/ii2TVMHj/raw" }
 }
 
 local function notify(title, text, duration)
