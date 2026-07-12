@@ -1,39 +1,129 @@
--- Nova Hub Universal Script Loader
--- Detecta automaticamente o jogo e carrega o script correto
-
 local PlaceId = game.PlaceId
 local scriptLoaded = false
 
--- Tabela de scripts por PlaceId
+local bloxFruitsIds = {
+    [2753915549] = true,
+    [85211729168715] = true,
+    [4442272183] = true,
+    [79091703265657] = true,
+    [7449423635] = true,
+    [100117331123089] = true
+}
+
+local breakIn2Ids = {
+    [13864667823] = true,
+    [14775231477] = true,
+    [13864661000] = true
+}
+
 local scripts = {
     ["130550579381261"] = { name = "99 Nights", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub99nigths" },
-    ["2753915549"] = { name = "Blox Fruits (Redz)", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub-bloxfruits" },
-    ["2753915549"] = { name = "Blox Fruits (Kaitun)", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/NovaKaitun" },
     ["537413528"] = { name = "Build A Boat For Treasure", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/build-a-boat" },
     ["4924922222"] = { name = "Brookhaven RP", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/d5a9c0ccf1b3ec48c4315cff85ebf403c2112bc3/brookhavem" },
     ["142823291"] = { name = "Murder Mystery 2", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub-mm2" },
     ["16116270224"] = { name = "Dandy's World", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Dandys-World" },
     ["77747658251236"] = { name = "Sailor Piece", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Sailor%20piece" },
-    ["universal"] = { name = "Nova X Lite", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Nova%20X%20Lite" },
     ["8908228901"] = { name = "Sharkbite 2", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/obf_1345878595888877568_1783882539205.lua.txt" },
     ["893973440"] = { name = "Flee The Facility", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/obf_1345878595888877568_1783883089228.lua.txt" },
-    ["universal"] = { name = "Nova Hub Banana", url = "https://pastefy.app/LpL9NMt1/raw" },
-    ["universal"] = { name = "Various Free Scripts", url = "https://pastefy.app/jes7xB1U/raw" },
-    ["13864661000"] = { name = "Break In 2", url = "https://pastefy.app/jes7xB1U/raw" },
-
 }
 
--- Função de notificação
 local function notify(title, text, duration)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = title;
-        Text = text;
-        Duration = duration or 5;
-    })
+    pcall(function()
+        game.StarterGui:SetCore("SendNotification", {
+            Title = title;
+            Text = text;
+            Duration = duration or 5;
+        })
+    end)
 end
 
--- Verifica se existe script para este jogo
-if scripts[tostring(PlaceId)] then
+local function abrirMenuBloxFruits()
+    local sg = Instance.new("ScreenGui")
+    sg.Name = "NovaHubMenuBlox"
+    sg.ResetOnSpawn = false
+    
+    local parentFolder = pcall(function() return game:GetService("CoreGui") end) and game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    sg.Parent = parentFolder
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 280, 0, 230)
+    mainFrame.Position = UDim2.new(0.5, -140, 0.5, -115)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = sg
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = mainFrame
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 45)
+    title.BackgroundTransparency = 1
+    title.Text = "Nova Hub - Blox Fruits"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 16
+    title.Font = Enum.Font.GothamBold
+    title.Parent = mainFrame
+
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.Padding = UDim.new(0, 8)
+    listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Parent = mainFrame
+    
+    local padding = Instance.new("UIPadding")
+    padding.PaddingTop = UDim.new(0, 50)
+    padding.Parent = mainFrame
+
+    local function criarOpcao(nome, url, ordem)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0, 240, 0, 42)
+        btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        btn.Text = nome
+        btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+        btn.TextSize = 14
+        btn.Font = Enum.Font.GothamMedium
+        btn.LayoutOrder = ordem
+        btn.Parent = mainFrame
+
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 6)
+        btnCorner.Parent = btn
+
+        btn.MouseButton1Click:Connect(function()
+            sg:Destroy()
+            notify("Nova Hub", "Carregando " .. nome .. "...", 3)
+            local success, err = pcall(function()
+                loadstring(game:HttpGet(url))()
+            end)
+            if success then
+                notify("Nova Hub", nome .. " carregado!", 4)
+                scriptLoaded = true
+            else
+                notify("Nova Hub", "Erro ao injetar script: " .. tostring(err), 5)
+            end
+        end)
+    end
+
+    criarOpcao("Kaitun (Auto-Farm)", "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/NovaKaitun", 1)
+    criarOpcao("Main Redz", "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub-bloxfruits", 2)
+    criarOpcao("Main Banana", "https://pastefy.app/LpL9NMt1/raw", 3)
+end
+
+if bloxFruitsIds[PlaceId] then
+    abrirMenuBloxFruits()
+elseif breakIn2Ids[PlaceId] then
+    notify("Nova Hub", "Carregando Break In 2...", 3)
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://pastefy.app/jes7xB1U/raw"))()
+    end)
+    if success then
+        notify("Nova Hub", "Break In 2 carregado com sucesso!", 5)
+        scriptLoaded = true
+    else
+        notify("Nova Hub", "Erro ao carregar: " .. tostring(err), 5)
+    end
+elseif scripts[tostring(PlaceId)] then
     local scriptData = scripts[tostring(PlaceId)]
     notify("Nova Hub", "Carregando " .. scriptData.name .. "...", 3)
     
