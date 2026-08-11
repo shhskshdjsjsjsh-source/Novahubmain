@@ -1,3 +1,7 @@
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+
 local PlaceId = game.PlaceId
 local scriptLoaded = false
 
@@ -34,6 +38,23 @@ local scripts = {
     ["79268393072444"] = { name = "Protected", url = "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/protected.lua.txt" }
 }
 
+----------------------------------------------------------------
+-- THEME
+----------------------------------------------------------------
+local Theme = {
+    Background   = Color3.fromRGB(15, 15, 20),
+    Panel        = Color3.fromRGB(22, 22, 30),
+    PanelAlt     = Color3.fromRGB(28, 28, 38),
+    Accent       = Color3.fromRGB(138, 92, 246),   -- roxo Nova Hub
+    AccentDim    = Color3.fromRGB(90, 60, 170),
+    Text         = Color3.fromRGB(240, 240, 245),
+    SubText      = Color3.fromRGB(160, 160, 175),
+    Stroke       = Color3.fromRGB(50, 50, 65),
+}
+
+----------------------------------------------------------------
+-- NOTIFY
+----------------------------------------------------------------
 local function notify(title, text, duration)
     pcall(function()
         game.StarterGui:SetCore("SendNotification", {
@@ -44,60 +65,237 @@ local function notify(title, text, duration)
     end)
 end
 
+----------------------------------------------------------------
+-- HELPERS DE UI
+----------------------------------------------------------------
+local function tween(obj, props, time, style, dir)
+    return TweenService:Create(obj, TweenInfo.new(
+        time or 0.25,
+        style or Enum.EasingStyle.Quint,
+        dir or Enum.EasingDirection.Out
+    ), props)
+end
+
+local function corner(parent, radius)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, radius or 10)
+    c.Parent = parent
+    return c
+end
+
+local function stroke(parent, color, thickness)
+    local s = Instance.new("UIStroke")
+    s.Color = color or Theme.Stroke
+    s.Thickness = thickness or 1
+    s.Parent = parent
+    return s
+end
+
+local function gradient(parent, colorSeq, rotation)
+    local g = Instance.new("UIGradient")
+    g.Color = colorSeq
+    g.Rotation = rotation or 0
+    g.Parent = parent
+    return g
+end
+
+local function getGuiParent()
+    local ok, cg = pcall(function() return CoreGui end)
+    if ok and cg then return cg end
+    return Players.LocalPlayer:WaitForChild("PlayerGui")
+end
+
+----------------------------------------------------------------
+-- CONSTRUÇÃO DO MENU (usado para Blox Fruits, com múltiplas opções)
+----------------------------------------------------------------
 local function abrirMenuBloxFruits()
     local sg = Instance.new("ScreenGui")
     sg.Name = "NovaHubMenuBlox"
     sg.ResetOnSpawn = false
-    
-    local parentFolder = pcall(function() return game:GetService("CoreGui") end) and game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-    sg.Parent = parentFolder
+    sg.IgnoreGuiInset = true
+    sg.Parent = getGuiParent()
 
+    -- Fundo escurecido (blur visual leve com frame semitransparente)
+    local overlay = Instance.new("Frame")
+    overlay.Size = UDim2.fromScale(1, 1)
+    overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    overlay.BackgroundTransparency = 1
+    overlay.ZIndex = 0
+    overlay.Parent = sg
+    tween(overlay, {BackgroundTransparency = 0.45}, 0.3):Play()
+
+    -- Cartão principal
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 280, 0, 230)
-    mainFrame.Position = UDim2.new(0.5, -140, 0.5, -115)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    mainFrame.Size = UDim2.new(0, 300, 0, 0) -- altura animada
+    mainFrame.AutomaticSize = Enum.AutomaticSize.Y
+    mainFrame.Position = UDim2.new(0.5, -150, 0.5, -20)
+    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    mainFrame.BackgroundColor3 = Theme.Panel
     mainFrame.BorderSizePixel = 0
+    mainFrame.ClipsDescendants = false
     mainFrame.Parent = sg
+    corner(mainFrame, 14)
+    stroke(mainFrame, Theme.Stroke, 1)
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = mainFrame
+    -- animação de entrada
+    mainFrame.Size = UDim2.new(0, 260, 0, 0)
+    local sizeGoal = UDim2.new(0, 300, 0, 0)
+    mainFrame.BackgroundTransparency = 1
+    tween(mainFrame, {Size = sizeGoal, BackgroundTransparency = 0}, 0.3):Play()
+
+    local layout = Instance.new("UIListLayout")
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 0)
+    layout.Parent = mainFrame
+
+    local outerPad = Instance.new("UIPadding")
+    outerPad.PaddingBottom = UDim.new(0, 16)
+    outerPad.Parent = mainFrame
+
+    -- Cabeçalho com faixa de gradiente
+    local header = Instance.new("Frame")
+    header.Size = UDim2.new(1, 0, 0, 64)
+    header.BackgroundColor3 = Theme.PanelAlt
+    header.BorderSizePixel = 0
+    header.LayoutOrder = 0
+    header.Parent = mainFrame
+    corner(header, 14)
+
+    -- máscara para cantos inferiores do header ficarem retos
+    local headerMask = Instance.new("Frame")
+    headerMask.Size = UDim2.new(1, 0, 0, 14)
+    headerMask.Position = UDim2.new(0, 0, 1, -14)
+    headerMask.BackgroundColor3 = Theme.PanelAlt
+    headerMask.BorderSizePixel = 0
+    headerMask.ZIndex = header.ZIndex
+    headerMask.Parent = header
+
+    gradient(header, ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Theme.Accent),
+        ColorSequenceKeypoint.new(1, Theme.PanelAlt)
+    }), 20)
+
+    local badge = Instance.new("Frame")
+    badge.Size = UDim2.new(0, 8, 0, 8)
+    badge.Position = UDim2.new(0, 20, 0, 16)
+    badge.BackgroundColor3 = Theme.Accent
+    badge.BorderSizePixel = 0
+    badge.Parent = header
+    corner(badge, 4)
+
+    local eyebrow = Instance.new("TextLabel")
+    eyebrow.BackgroundTransparency = 1
+    eyebrow.Position = UDim2.new(0, 34, 0, 8)
+    eyebrow.Size = UDim2.new(1, -50, 0, 16)
+    eyebrow.Text = "NOVA HUB"
+    eyebrow.TextColor3 = Theme.SubText
+    eyebrow.TextSize = 11
+    eyebrow.Font = Enum.Font.GothamBold
+    eyebrow.TextXAlignment = Enum.TextXAlignment.Left
+    eyebrow.Parent = header
 
     local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0, 45)
     title.BackgroundTransparency = 1
-    title.Text = "Nova Hub - Blox Fruits"
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.TextSize = 16
+    title.Position = UDim2.new(0, 20, 0, 24)
+    title.Size = UDim2.new(1, -40, 0, 28)
+    title.Text = "Blox Fruits"
+    title.TextColor3 = Theme.Text
+    title.TextSize = 19
     title.Font = Enum.Font.GothamBold
-    title.Parent = mainFrame
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = header
 
-    local listLayout = Instance.new("UIListLayout")
-    listLayout.Padding = UDim.new(0, 8)
-    listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    listLayout.Parent = mainFrame
-    
-    local padding = Instance.new("UIPadding")
-    padding.PaddingTop = UDim.new(0, 50)
-    padding.Parent = mainFrame
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 26, 0, 26)
+    closeBtn.Position = UDim2.new(1, -38, 0, 10)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    closeBtn.BackgroundTransparency = 0.6
+    closeBtn.Text = "×"
+    closeBtn.TextColor3 = Theme.Text
+    closeBtn.TextSize = 18
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.Parent = header
+    corner(closeBtn, 13)
+    closeBtn.MouseButton1Click:Connect(function()
+        tween(mainFrame, {BackgroundTransparency = 1}, 0.15):Play()
+        tween(overlay, {BackgroundTransparency = 1}, 0.15):Play()
+        task.wait(0.16)
+        sg:Destroy()
+    end)
 
-    local function criarOpcao(nome, url, ordem)
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0, 240, 0, 42)
-        btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-        btn.Text = nome
-        btn.TextColor3 = Color3.fromRGB(240, 240, 240)
-        btn.TextSize = 14
-        btn.Font = Enum.Font.GothamMedium
-        btn.LayoutOrder = ordem
-        btn.Parent = mainFrame
+    -- Container das opções
+    local optionsHolder = Instance.new("Frame")
+    optionsHolder.BackgroundTransparency = 1
+    optionsHolder.Size = UDim2.new(1, 0, 0, 0)
+    optionsHolder.AutomaticSize = Enum.AutomaticSize.Y
+    optionsHolder.LayoutOrder = 1
+    optionsHolder.Parent = mainFrame
 
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 6)
-        btnCorner.Parent = btn
+    local optLayout = Instance.new("UIListLayout")
+    optLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    optLayout.Padding = UDim.new(0, 8)
+    optLayout.Parent = optionsHolder
 
-        btn.MouseButton1Click:Connect(function()
+    local optPad = Instance.new("UIPadding")
+    optPad.PaddingLeft = UDim.new(0, 16)
+    optPad.PaddingRight = UDim.new(0, 16)
+    optPad.PaddingTop = UDim.new(0, 14)
+    optPad.Parent = optionsHolder
+
+    local function criarOpcao(nome, url, ordem, subtitulo)
+        local card = Instance.new("TextButton")
+        card.Size = UDim2.new(1, 0, 0, 52)
+        card.BackgroundColor3 = Theme.PanelAlt
+        card.AutoButtonColor = false
+        card.Text = ""
+        card.LayoutOrder = ordem
+        card.Parent = optionsHolder
+        corner(card, 10)
+        local cardStroke = stroke(card, Theme.Stroke, 1)
+
+        local icon = Instance.new("Frame")
+        icon.Size = UDim2.new(0, 4, 1, -16)
+        icon.Position = UDim2.new(0, 8, 0, 8)
+        icon.BackgroundColor3 = Theme.Accent
+        icon.BorderSizePixel = 0
+        icon.Parent = card
+        corner(icon, 2)
+
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Position = UDim2.new(0, 24, 0, 6)
+        nameLabel.Size = UDim2.new(1, -40, 0, 20)
+        nameLabel.Text = nome
+        nameLabel.TextColor3 = Theme.Text
+        nameLabel.TextSize = 14
+        nameLabel.Font = Enum.Font.GothamMedium
+        nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        nameLabel.Parent = card
+
+        local subLabel = Instance.new("TextLabel")
+        subLabel.BackgroundTransparency = 1
+        subLabel.Position = UDim2.new(0, 24, 0, 26)
+        subLabel.Size = UDim2.new(1, -40, 0, 16)
+        subLabel.Text = subtitulo or "Toque para carregar"
+        subLabel.TextColor3 = Theme.SubText
+        subLabel.TextSize = 11
+        subLabel.Font = Enum.Font.Gotham
+        subLabel.TextXAlignment = Enum.TextXAlignment.Left
+        subLabel.Parent = card
+
+        card.MouseEnter:Connect(function()
+            tween(card, {BackgroundColor3 = Color3.fromRGB(36, 36, 48)}, 0.15):Play()
+            tween(cardStroke, {Color = Theme.Accent}, 0.15):Play()
+        end)
+        card.MouseLeave:Connect(function()
+            tween(card, {BackgroundColor3 = Theme.PanelAlt}, 0.15):Play()
+            tween(cardStroke, {Color = Theme.Stroke}, 0.15):Play()
+        end)
+
+        card.MouseButton1Click:Connect(function()
+            tween(mainFrame, {BackgroundTransparency = 1}, 0.15):Play()
+            tween(overlay, {BackgroundTransparency = 1}, 0.15):Play()
+            task.wait(0.16)
             sg:Destroy()
             notify("Nova Hub", "Carregando " .. nome .. "...", 3)
             local success, err = pcall(function()
@@ -112,11 +310,25 @@ local function abrirMenuBloxFruits()
         end)
     end
 
-    criarOpcao("Kaitun (Auto-Farm)", "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/NovaKaitun", 1)
-    criarOpcao("Main Redz", "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub-bloxfruits", 2)
-    criarOpcao("Main Banana", "https://pastefy.app/LpL9NMt1/raw", 3)
+    criarOpcao("Kaitun", "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/NovaKaitun", 1, "Auto-Farm completo")
+    criarOpcao("Main Redz", "https://raw.githubusercontent.com/shhskshdjsjsjsh-source/Novahubmain/refs/heads/main/Novahub-bloxfruits", 2, "Script principal")
+    criarOpcao("Main Banana", "https://pastefy.app/LpL9NMt1/raw", 3, "Script alternativo")
+
+    -- Rodapé
+    local footer = Instance.new("TextLabel")
+    footer.BackgroundTransparency = 1
+    footer.Size = UDim2.new(1, 0, 0, 16)
+    footer.LayoutOrder = 2
+    footer.Text = "Nova Hub • by Nexustester"
+    footer.TextColor3 = Theme.SubText
+    footer.TextSize = 10
+    footer.Font = Enum.Font.Gotham
+    footer.Parent = mainFrame
 end
 
+----------------------------------------------------------------
+-- ROTEAMENTO
+----------------------------------------------------------------
 if bloxFruitsIds[PlaceId] then
     abrirMenuBloxFruits()
 elseif breakIn2Ids[PlaceId] then
@@ -144,11 +356,11 @@ elseif dandysWorldIds[PlaceId] then
 elseif scripts[tostring(PlaceId)] then
     local scriptData = scripts[tostring(PlaceId)]
     notify("Nova Hub", "Carregando " .. scriptData.name .. "...", 3)
-    
+
     local success, err = pcall(function()
         loadstring(game:HttpGet(scriptData.url))()
     end)
-    
+
     if success then
         notify("Nova Hub", scriptData.name .. " carregado com sucesso!", 5)
         scriptLoaded = true
